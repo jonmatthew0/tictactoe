@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Tictactoe</title>
+    <style>
+        /* Make the whole screen black and center everything vertically and horizontally */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background-color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: monospace;
+            color: white;
+        }
+
+        /* This is the small text at the top telling the user how to restart the game */
+        #restart {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 15px;
+            width: fit-content;
+            text-align: center;
+            user-select: none; /* Prevents user from accidentally selecting the text */
+        }
+
+        /* This sets up a 3x3 grid for the game board */
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(3, 50px);
+            gap: 5px; /* Space between the squares */
+        }
+
+        /* Each square on the board looks like this */
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: #222;
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+            line-height: 50px; /* Centers the text vertically */
+            cursor: pointer;
+            border: 1px solid #444;
+            user-select: none;
+        }
+
+        /* When you hover over a square, it gets slightly lighter */
+        .cell:hover {
+            background-color: #333;
+        }
+
+        /* This shows whose turn it is or the result of the game */
+        #status {
+            margin-top: 15px;
+            text-align: center;
+            min-height: 1.5em; /* Keeps the layout from jumping when text changes */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Instructions to restart the game by pressing "R" -->
+    <div id="restart">Restart "R" Game</div>
+
+    <!-- The actual Tic Tac Toe board -->
+    <div id="gameBoard"></div>
+
+    <!-- Text below the board showing the current status -->
+    <div id="status">Turn: X</div>
+
+    <script>
+        // Grab the board and status elements from the page
+        const boardElement = document.getElementById('gameBoard');
+        const statusElement = document.getElementById('status');
+
+        // Start with player X and an empty board
+        let turn = 'X';
+        let grid = Array(9).fill(''); // Represents each cell on the board
+        let gameOver = false;
+
+        // Updates the text below the board (whose turn or who won)
+        function updateStatus(text) {
+            statusElement.textContent = text;
+        }
+
+        // Create 9 squares (cells) and add them to the board
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.index = i;
+            boardElement.appendChild(cell);
+
+            // When a cell is clicked...
+            cell.addEventListener('click', () => {
+                // If the cell already has a mark or the game is over, do nothing
+                if (cell.textContent !== '' || gameOver) return;
+
+                // Mark the cell with the current player's symbol
+                cell.textContent = turn;
+                grid[i] = turn;
+
+                // Check if the current player has won
+                if (checkWin(turn)) {
+                    updateStatus(`${turn} wins!`);
+                    gameOver = true;
+                    return;
+                }
+
+                // If the board is full and no winner, it's a draw
+                if (!grid.includes('')) {
+                    updateStatus("It's a draw!");
+                    gameOver = true;
+                    return;
+                }
+
+                // Switch to the other player's turn
+                turn = turn === 'X' ? 'O' : 'X';
+                updateStatus(`Turn: ${turn}`);
+            });
+        }
+
+        // This function checks if the given player has a winning combination
+        function checkWin(player) {
+            const combos = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                [0, 4, 8], [2, 4, 6]             // Diagonals
+            ];
+            return combos.some(combo => combo.every(i => grid[i] === player));
+        }
+
+        // Resets the game so it can start fresh
+        function resetGame() {
+            grid = Array(9).fill('');
+            turn = 'X';
+            gameOver = false;
+            updateStatus('Turn: X');
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+            });
+        }
+
+        // Listen for the "R" key to restart the game
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'r') {
+                resetGame();
+            }
+        });
+    </script>
+</body>
+
+</html>
